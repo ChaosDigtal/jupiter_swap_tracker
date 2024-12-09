@@ -386,7 +386,7 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
 
     await getUSDPriceForTokens(accountsToBeFetched.map(pk => pk.toString()).join(','))
 
-    const swapData = await parseSwapEvents(accountInfosMap, swapEvents);
+    const swapData = parseSwapEvents(accountInfosMap, swapEvents);
     const instructions = parser.getInstructions(tx);
     const [initialPositions, finalPositions] =
         parser.getInitialAndFinalSwapPositions(instructions);
@@ -506,28 +506,26 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
         swap.feeMint = mint;
     }
 
-    console.log(swap);
+    // console.log(swap);
     // db_save_batch(swap);
     console.log(
         `Finished in ${(new Date().getTime() - start_time.getTime()) / 1000
-        } seconds`
+        } seconds for transaction ${swap.signature}`
     )
 
     // return swap;
 }
 
-async function parseSwapEvents(
+function parseSwapEvents(
     accountInfosMap: AccountInfoMap,
     swapEvents: SwapEvent[]
 ) {
-    const swapData = await Promise.all(
-        swapEvents.map((swapEvent) => extractSwapData(accountInfosMap, swapEvent))
-    );
+    const swapData = swapEvents.map((swapEvent) => extractSwapData(accountInfosMap, swapEvent))
 
     return swapData;
 }
 
-async function extractSwapData(
+function extractSwapData(
     accountInfosMap: AccountInfoMap,
     swapEvent: SwapEvent
 ) {
@@ -540,7 +538,7 @@ async function extractSwapData(
         amount: inAmount,
         amountInDecimal: inAmountInDecimal,
         amountInUSD: inAmountInUSD,
-    } = await extractVolume(
+    } = extractVolume(
         accountInfosMap,
         swapEvent.inputMint,
         swapEvent.inputAmount
@@ -550,7 +548,7 @@ async function extractSwapData(
         amount: outAmount,
         amountInDecimal: outAmountInDecimal,
         amountInUSD: outAmountInUSD,
-    } = await extractVolume(
+    } = extractVolume(
         accountInfosMap,
         swapEvent.outputMint,
         swapEvent.outputAmount
@@ -569,7 +567,7 @@ async function extractSwapData(
     };
 }
 
-async function extractVolume(
+function extractVolume(
     accountInfosMap: AccountInfoMap,
     mint: PublicKey,
     amount: BN
