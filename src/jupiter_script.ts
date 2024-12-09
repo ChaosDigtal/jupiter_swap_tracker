@@ -284,7 +284,7 @@ async function db_save_batch(swap: SwapAttributes) {
         for (const event of batch) {
             const defaultDecimal = new Decimal(0);
             values.push(
-                '',
+                0,
                 swap.signature,
                 swap.owner,
                 event.inMint,
