@@ -218,6 +218,17 @@ const client = new Client({
     }
 })
 
+async function testConnection() {
+    try {
+        await client.connect(); // Attempt to connect
+        console.log('Connection successful!');
+    } catch (err) {
+        console.error('Connection failed:', err.message);
+    }
+}
+
+testConnection();
+
 async function getUSDPriceForTokens(tokens: string) {
     try {
         let payload = (await got
@@ -259,6 +270,31 @@ const safeNumber = (value: Decimal) => {
     const truncatedValue = scaledValue.toPrecision(maxPrecision);
 
     return new Decimal(truncatedValue);
+}
+
+async function fetchWalletAddresses() {
+    try {
+        // Query to execute the dblink function
+        const query = `
+        SELECT t_wallet_address
+        FROM dblink(
+          'host=prod-trading.copaicjskl31.us-east-2.rds.amazonaws.com port=5000 dbname=trading user=creative_dev_lim password=6cVgAGualY9qO9c',
+          'SELECT DISTINCT t_wallet_address FROM turnkey_wallets_sol'
+        ) AS remote_data(t_wallet_address TEXT);
+      `;
+
+        // Execute the query
+        const result = await client.query(query);
+
+        // Process the result
+        const walletAddresses = result.rows.map(row => row.t_wallet_address);
+
+        // Return the wallet addresses if needed
+        return walletAddresses;
+    } catch (error) {
+        console.error('Error executing query:', error);
+        throw error;
+    }
 }
 
 async function db_save_batch(swap: SwapAttributes) {
@@ -617,32 +653,36 @@ function initializeWebSocket(): void {
         'wss://atlas-mainnet.helius-rpc.com/?api-key=ca2cdbc8-39e0-483e-9514-7581edc3c44f'
     );
 
-    ws.on('open', () => {
+    ws.on('open', async () => {
         console.log('WebSocket is open');
         const filePath = 'sol_wallets.csv';
 
-        const dataList: string[] = [];
+        const wallets = await fetchWalletAddresses();
+        sendRequest(ws, wallets)
+        startPing(ws)
+        // console.log(wallets)
+        // const dataList: string[] = [];
 
-        const readStream = fs.createReadStream(filePath);
-        const parser = csv.parse({ delimiter: ',', from_line: 2 });
+        // const readStream = fs.createReadStream(filePath);
+        // const parser = csv.parse({ delimiter: ',', from_line: 2 });
 
-        parser.on('readable', () => {
-            let record: string[] | null;
-            while ((record = parser.read()) !== null) {
-                dataList.push(record[0]);
-            }
-        });
+        // parser.on('readable', () => {
+        //     let record: string[] | null;
+        //     while ((record = parser.read()) !== null) {
+        //         dataList.push(record[0]);
+        //     }
+        // });
 
-        parser.on('end', () => {
-            sendRequest(ws, dataList);
-            startPing(ws);
-        });
+        // parser.on('end', () => {
+        //     // sendRequest(ws, dataList);
+        //     startPing(ws);
+        // });
 
-        parser.on('error', (err: Error) => {
-            console.error(err.message);
-        });
+        // parser.on('error', (err: Error) => {
+        //     console.error(err.message);
+        // });
 
-        readStream.pipe(parser);
+        // readStream.pipe(parser);
     });
 
     ws.on('message', (data: WebSocket.Data) => {
