@@ -336,7 +336,7 @@ const safeNumber = value => {
 // Function to parse a transaction (to be implemented as per use case)
 async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes | undefined> {
     const start_time = new Date()
-    console.log(start_time, tx.transaction.signatures[0])
+    console.log(start_time, tx.transaction.signatures[0], `transaction count: ${tx.meta.innerInstructions.length}`)
 
     const accountInfosMap: AccountInfoMap = new Map();
     const programId = JUPITER_V6_PROGRAM_ID;
