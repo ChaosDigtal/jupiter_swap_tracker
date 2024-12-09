@@ -37,7 +37,7 @@ export type SwapAttributes = {
     exactInAmountInUSD: number;
     exactOutAmount: BigInt;
     exactOutAmountInUSD: number;
-    swapData: JSON;
+    swapData: any[];
     feeTokenPubkey?: string;
     feeOwner?: string;
     feeSymbol?: string;
@@ -208,10 +208,10 @@ const processTransactionWithMeta = (tx: TransactionWithMeta) => {
 let tokenUSDPrice: PriceData = {};
 
 const client = new Client({
-    host: 'trading.copaicjskl31.us-east-2.rds.amazonaws.com',
+    host: '18.117.159.85',
     database: 'trading',
     user: 'creative_dev',
-    password: '4hXWW1%G$',
+    password: 'DuBR0NCMAsRg1bu',
     port: 5000,
     ssl: {
         rejectUnauthorized: false // Bypass certificate validation
@@ -224,6 +224,8 @@ async function getUSDPriceForTokens(tokens: string) {
             .get(`https://api.jup.ag/price/v2?ids=${tokens}`)
             .json()) as any;
 
+        if (payload['data'] === undefined)
+            console.log(payload)
         tokenUSDPrice = payload['data'] as PriceData;
 
     } catch (e) {
@@ -234,7 +236,7 @@ async function getUSDPriceForTokens(tokens: string) {
     return;
 }
 
-const safeNumber = value => {
+const safeNumber = (value: Decimal) => {
     if (value.isNaN() || !value.isFinite()) {
         return new Decimal(0) // or new Decimal(null), depending on your database schema
     }
@@ -251,87 +253,89 @@ const safeNumber = value => {
     if (value.lessThan(minValue)) {
         return minValue
     }
-    return value
+
+    // Ensure the value conforms to max precision and scale
+    const scaledValue = value.toDecimalPlaces(maxScale);
+    const truncatedValue = scaledValue.toPrecision(maxPrecision);
+
+    return new Decimal(truncatedValue);
 }
 
-// async function db_save_batch(swaps : SwapAttributes) {
-//     const BATCH_SIZE = 100
+async function db_save_batch(swap: SwapAttributes) {
+    const BATCH_SIZE = 100;
+    const COLUMN_COUNT = 15;
 
-//     const batches = []
-//     for (let i = 0; i < swaps.length; i += BATCH_SIZE) {
-//         const batch = swaps.slice(i, i + BATCH_SIZE)
-//         batches.push(batch)
-//     }
+    const batches = [];
+    const swapData = swap.swapData;
 
-//     for (let i = 0; i < batches.length; ++i) {
-//         const batch = batches[i]
-//         const values = []
-//         const placeholders = batch
-//             .map((_, i) => {
-//                 const offset = i * 15
-//                 return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4
-//                     }, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9
-//                     }, $${offset + 10}, $${offset + 11}, $${offset + 12}, $${offset + 13
-//                     }, $${offset + 14}, $${offset + 15})`
-//             })
-//             .join(',')
-//         for (let j = 0; j < batch.length; ++j) {
-//             const event = batch[j]
-//             values.push(
-//                 event.slot,
-//                 event.signature,
-//                 event.wallet,
-//                 event.token0.id.toLowerCase(),
-//                 event.token0.symbol,
-//                 safeNumber(event.token0.amount ?? new Decimal(0)).toString(),
-//                 safeNumber(event.token0.value_in_usd ?? new Decimal(0)).toString(),
-//                 safeNumber(
-//                     event.token0.total_exchanged_usd ?? new Decimal(0)
-//                 ).toString(),
-//                 event.token1.id.toLowerCase(),
-//                 event.token1.symbol,
-//                 safeNumber(event.token1.amount ?? new Decimal(0)).toString(),
-//                 safeNumber(event.token1.value_in_usd ?? new Decimal(0)).toString(),
-//                 safeNumber(
-//                     event.token1.total_exchanged_usd ?? new Decimal(0)
-//                 ).toString(),
-//                 // safeNumber(SOL2USD ?? new Decimal(0)).toString(),
-//                 event.created_at.toISOString()
-//             )
-//         }
-//         const query = `
-// INSERT INTO sol_swap_events (
-// block_number,
-// transaction_hash,
-// wallet_address,
-// token0_id,
-// token0_symbol,
-// token0_amount,
-// token0_value_in_usd,
-// token0_total_exchanged_usd,
-// token1_id,
-// token1_symbol,
-// token1_amount,
-// token1_value_in_usd,
-// token1_total_exchanged_usd,
-// sol_usd_price,
-// created_at
-// ) VALUES ${placeholders}
-// `
-//         try {
-//             await client.query(query, values)
-//         } catch (err) {
-//             console.error('Error saving batch of events', err)
-//             fs.appendFile('./logs/error.txt', err + '\n', err => {
-//                 if (err) {
-//                     console.error('Error writing file', err)
-//                 } else {
-//                     console.log('File has been written successfully')
-//                 }
-//             })
-//         }
-//     }
-// }
+    for (let i = 0; i < swapData.length; i += BATCH_SIZE) {
+        batches.push(swapData.slice(i, i + BATCH_SIZE));
+    }
+
+    for (const batch of batches) {
+        const values: (string | number)[] = [];
+        const placeholders = batch
+            .map((_, i) => {
+                const offset = i * COLUMN_COUNT;
+                return `(${Array.from({ length: COLUMN_COUNT }, (_, j) => `$${offset + j + 1}`).join(',')})`;
+            })
+            .join(',');
+
+        for (const event of batch) {
+            const defaultDecimal = new Decimal(0);
+            values.push(
+                '',
+                swap.signature,
+                swap.owner,
+                event.inMint,
+                '',
+                safeNumber(event.inAmountInDecimal ?? defaultDecimal).toString(),
+                safeNumber(event.inAmountInUSD ?? defaultDecimal).toString(),
+                safeNumber(
+                    swap.inAmountInDecimal ? new Decimal(swap.inAmountInDecimal) : defaultDecimal
+                ).toString(),
+                event.outMint,
+                '',
+                safeNumber(event.outAmountInDecimal ?? defaultDecimal).toString(),
+                safeNumber(event.outAmountInUSD ?? defaultDecimal).toString(),
+                safeNumber(
+                    swap.outAmountInDecimal ? new Decimal(swap.outAmountInDecimal) : defaultDecimal
+                ).toString(),
+                new Decimal(0).toString(),
+                swap.timestamp.toISOString()
+            );
+        }
+
+        const query = `
+        INSERT INTO sol_swap_events_cd (
+            block_number,
+            transaction_hash,
+            wallet_address,
+            token0_id,
+            token0_symbol,
+            token0_amount,
+            token0_value_in_usd,
+            token0_total_exchanged_usd,
+            token1_id,
+            token1_symbol,
+            token1_amount,
+            token1_value_in_usd,
+            token1_total_exchanged_usd,
+            sol_usd_price,
+            created_at
+        ) VALUES ${placeholders}`;
+
+        try {
+            await client.query(query, values);
+        } catch (err) {
+            console.error('Error saving batch of events', err);
+            fs.appendFile('./logs/error.txt', `Error: ${err}\nQuery: ${query}\nValues: ${JSON.stringify(values)}\n`, (err) => {
+                if (err) console.error('Error writing log file', err);
+            });
+        }
+    }
+}
+
 
 // Function to parse a transaction (to be implemented as per use case)
 async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes | undefined> {
@@ -437,6 +441,7 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
     swap.owner = tx.transaction.message.accountKeys[0].pubkey.toBase58();
     swap.programId = programId.toBase58();
     swap.signature = tx.transaction.signatures[0];
+    swap.timestamp = new Date(start_time.getTime() - 3000)
     // swap.timestamp = new Date(new Date((blockTime ?? 0) * 1000).toISOString());
     swap.legCount = swapEvents.length;
     swap.volumeInUSD = volumeInUSD.toNumber();
@@ -482,7 +487,8 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
         }
     }
 
-    swap.swapData = JSON.parse(JSON.stringify(swapData));
+    swap.swapData = swapData;
+    // swap.swapData = JSON.parse(JSON.stringify(swapData));
     console.log(feeEvent)
 
     if (feeEvent) {
@@ -490,7 +496,7 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
         console.log('------------------')
         console.log(feeEvent)
         console.log('----------------')
-        const { mint, amount, amountInDecimal, amountInUSD } = await extractVolume(
+        const { mint, amount, amountInDecimal, amountInUSD } = extractVolume(
             accountInfosMap,
             feeEvent.mint,
             feeEvent.amount
@@ -507,7 +513,8 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
     }
 
     // console.log(swap);
-    // db_save_batch(swap);
+    await db_save_batch(swap);
+
     console.log(
         `Finished in ${(new Date().getTime() - start_time.getTime()) / 1000
         } seconds for transaction ${swap.signature}`
@@ -595,13 +602,13 @@ function extractTokenAccountOwner(
     console.log(accountInfosMap, account.toBase58())
     const accountData = accountInfosMap.get(account.toBase58());
 
-    return new PublicKey(accountData.owner);
+    return accountData ? new PublicKey(accountData.owner) : new PublicKey('');
 }
 
 function extractMintDecimals(accountInfosMap: AccountInfoMap, mint: PublicKey) {
     const mintData = accountInfosMap.get(mint.toBase58());
 
-    return mintData.uiTokenAmount.decimals
+    return mintData ? mintData.uiTokenAmount.decimals : 0
 }
 
 // Initialize the WebSocket connection and set up event handlers
