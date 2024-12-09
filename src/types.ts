@@ -35,6 +35,18 @@ export interface TransactionWithMeta {
             owner: string,
             programId: string
         }[],
+        preTokenBalances: {
+            accountIndex: number,
+            mint: string,
+            uiTokenAmount: {
+                uiAmount: number,
+                decimals: number,
+                amount: string,
+                uiAmountString: string
+            },
+            owner: string,
+            programId: string
+        }[],
     } | null;
     transaction: {
         signatures: string[];

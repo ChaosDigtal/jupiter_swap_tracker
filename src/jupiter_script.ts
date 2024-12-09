@@ -1,4 +1,5 @@
 import WebSocket from 'ws';
+import { Connection } from "@solana/web3.js";
 import csv from 'csv-parse';
 import fs from 'fs';
 import { Client } from 'pg';
@@ -372,7 +373,6 @@ async function db_save_batch(swap: SwapAttributes) {
     }
 }
 
-
 // Function to parse a transaction (to be implemented as per use case)
 async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes | undefined> {
     const start_time = new Date()
@@ -389,6 +389,11 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
 
     for (let j = 0; j < tx.meta.postTokenBalances.length; ++j) {
         const account = tx.meta.postTokenBalances[j]
+        accountInfosMap.set(account.mint, account)
+    }
+
+    for (let j = 0; j < tx.meta.preTokenBalances.length; ++j) {
+        const account = tx.meta.preTokenBalances[j]
         accountInfosMap.set(account.mint, account)
     }
 
@@ -527,26 +532,28 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
     // swap.swapData = JSON.parse(JSON.stringify(swapData));
     console.log(feeEvent)
 
-    if (feeEvent) {
-        console.log(accountInfosMap, accountsToBeFetched)
-        console.log('------------------')
-        console.log(feeEvent)
-        console.log('----------------')
-        const { mint, amount, amountInDecimal, amountInUSD } = extractVolume(
-            accountInfosMap,
-            feeEvent.mint,
-            feeEvent.amount
-        );
-        swap.feeTokenPubkey = feeEvent.account.toBase58();
-        swap.feeOwner = extractTokenAccountOwner(
-            accountInfosMap,
-            feeEvent.account
-        )?.toBase58();
-        swap.feeAmount = BigInt(amount);
-        swap.feeAmountInDecimal = amountInDecimal?.toNumber();
-        swap.feeAmountInUSD = amountInUSD?.toNumber();
-        swap.feeMint = mint;
-    }
+    // if (feeEvent) {
+    //     console.log('accountInfo')
+    //     console.log(accountInfosMap, accountsToBeFetched)
+    //     console.log('fee event')
+    //     console.log('------------------')
+    //     console.log(feeEvent)
+    //     console.log('----------------')
+    //     const { mint, amount, amountInDecimal, amountInUSD } = extractVolume(
+    //         accountInfosMap,
+    //         feeEvent.mint,
+    //         feeEvent.amount
+    //     );
+    //     swap.feeTokenPubkey = feeEvent.account.toBase58();
+    //     swap.feeOwner = extractTokenAccountOwner(
+    //         accountInfosMap,
+    //         feeEvent.account
+    //     )?.toBase58();
+    //     swap.feeAmount = BigInt(amount);
+    //     swap.feeAmountInDecimal = amountInDecimal?.toNumber();
+    //     swap.feeAmountInUSD = amountInUSD?.toNumber();
+    //     swap.feeMint = mint;
+    // }
 
     // console.log(swap);
     await db_save_batch(swap);
@@ -648,7 +655,20 @@ function extractMintDecimals(accountInfosMap: AccountInfoMap, mint: PublicKey) {
 }
 
 // Initialize the WebSocket connection and set up event handlers
-function initializeWebSocket(): void {
+async function initializeWebSocket(): Promise<void> {
+    // Test
+    
+    // const connection = new Connection('https://mainnet.helius-rpc.com/?api-key=35eb685f-3541-4c70-a396-7aa18696c965'); // Use your own RPC endpoint here.
+    // const tx = await connection.getParsedTransaction('5GZkharviv6BETxeU4HCAt4r9zRa6MUEtNnbZZW2xWkPkm113R1BozVHoJJqZoxERiuj9Kk8FnBqEnaf2x1ts2tR', {
+    //   maxSupportedTransactionVersion: 0,
+    // });
+
+    // if (tx.meta.err) {
+    //   console.log("Failed transaction", tx.meta.err);
+    // }
+
+    // parseTransaction(tx as TransactionWithMeta)
+    // return;
     const ws = new WebSocket(
         'wss://atlas-mainnet.helius-rpc.com/?api-key=ca2cdbc8-39e0-483e-9514-7581edc3c44f'
     );
