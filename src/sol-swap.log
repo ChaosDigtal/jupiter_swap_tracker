@@ -1319,3 +1319,63 @@
 [2024-12-09T06:32:50.186Z] LOG: "2024-12-09T06:32:50.186Z" 5tKPcdjfauusLvNbq3iC8DRRKwKBSsixRiPbgPwcXvvVHNH4Ufby42nUMCu47PHp3Ex79tbgM9D4aH3JgcBRcUfn
 [2024-12-09T06:32:54.458Z] LOG: "2024-12-09T06:32:54.458Z" 24ZsRoFUEaCLssSixtwYdHBa1KpmKqc8335Ue8HrPxJYMv9nhpG37rDZn28TTqcZaFZCqgc4wdLWhmFNUD9cTFQU
 [2024-12-09T06:32:55.855Z] LOG: Ping sent
+[2024-12-09T06:48:23.627Z] ERROR: D:\Eureka\Jupiter_Swap_Tracker\src\jupiter_script.ts:210
+const client = new Client({
+               ^
+[2024-12-09T06:48:23.630Z] ERROR: TypeError: pg_1.default is not a constructor
+    at Object.<anonymous> [90m(D:\Eureka\Jupiter_Swap_Tracker\[39msrc\jupiter_script.ts:210:16[90m)[39m
+[90m    at Module._compile (node:internal/modules/cjs/loader:1376:14)[39m
+    at Module.m._compile (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\index.ts:1618:23)
+[90m    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)[39m
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\index.ts:1621:12)
+[90m    at Module.load (node:internal/modules/cjs/loader:1207:32)[39m
+[90m    at Function.Module._load (node:internal/modules/cjs/loader:1023:12)[39m
+[90m    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:135:12)[39m
+    at phase4 (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\bin.ts:649:14)
+    at bootstrap (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\bin.ts:95:10)
+[2024-12-09T06:51:46.144Z] ERROR: D:\Eureka\Jupiter_Swap_Tracker\src\jupiter_script.ts:210
+const client = new Client({
+               ^
+[2024-12-09T06:51:46.146Z] ERROR: TypeError: pg_1.default is not a constructor
+    at Object.<anonymous> [90m(D:\Eureka\Jupiter_Swap_Tracker\[39msrc\jupiter_script.ts:210:16[90m)[39m
+[90m    at Module._compile (node:internal/modules/cjs/loader:1376:14)[39m
+    at Module.m._compile (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\index.ts:1618:23)
+[90m    at Module._extensions..js (node:internal/modules/cjs/loader:1435:10)[39m
+    at Object.require.extensions.<computed> [as .ts] (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\index.ts:1621:12)
+[90m    at Module.load (node:internal/modules/cjs/loader:1207:32)[39m
+[90m    at Function.Module._load (node:internal/modules/cjs/loader:1023:12)[39m
+[90m    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:135:12)[39m
+    at phase4 (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\bin.ts:649:14)
+    at bootstrap (C:\Users\Super\AppData\Roaming\npm\node_modules\[4mts-node[24m\src\bin.ts:95:10)
+[2024-12-09T06:54:32.138Z] LOG: WebSocket is open
+[2024-12-09T06:54:46.676Z] LOG: "2024-12-09T06:54:46.676Z" 3P1CuKyiH5nJy7oV7MiiBrTVYAJN8PhKrcctTpKi65hMfeSsxDLHcCco5FF3kfqLQ8cnVB891E1uuuRQY64BWh3i
+[2024-12-09T06:54:50.134Z] LOG: "2024-12-09T06:54:50.134Z" 3TVhWHfGfRBhXQJHnivKeE676cCpPGdbYwBFVj3HzoBEjVHkXdDVFrDGAMDBNMgFJmSnhPzT6hkC2ZVgwCenPKVG
+[2024-12-09T06:54:52.494Z] LOG: "2024-12-09T06:54:52.494Z" koonif19hnL6oRyvhAiB7BfnFGjXCT8NJKTz3vPHGPtMtHR25MbybuqyMFwA8pbXgLSEdSkdeT3BoUpePXgrGPR
+[2024-12-09T06:54:58.367Z] LOG: "2024-12-09T06:54:58.367Z" C7GxgGZkCbwN7Jy1rfg33ftt7BHjUJc7caLQHgwP4gE9zzoNoUV4NZDWwD2cUeF4MP5DU5VpQsqR1q7AGU7jqFG
+[2024-12-09T06:54:58.452Z] LOG: "2024-12-09T06:54:58.452Z" nKMV17PjZCKwLC3XFmLXw4a6Tiyan31oAbHsRuzSZ37q9dvr6G6gS3D9tKtN3jAKrNQyM8SypRDUqxYYutyTyPu
+[2024-12-09T06:55:02.166Z] LOG: Ping sent
+[2024-12-09T06:55:06.451Z] LOG: 
+[2024-12-09T06:55:06.458Z] ERROR: D:\Eureka\Jupiter_Swap_Tracker\src\logger.ts:34
+    const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(' ');
+                         ^
+[2024-12-09T06:55:06.459Z] ERROR: TypeError: Do not know how to serialize a BigInt
+    at JSON.stringify (<anonymous>)
+    at [90mD:\Eureka\Jupiter_Swap_Tracker\[39msrc\logger.ts:34:69
+    at Array.map (<anonymous>)
+    at console.log [90m(D:\Eureka\Jupiter_Swap_Tracker\[39msrc\logger.ts:34:26[90m)[39m
+    at [90mD:\Eureka\Jupiter_Swap_Tracker\[39msrc\jupiter_script.ts:509:13
+    at Generator.next (<anonymous>)
+    at fulfilled [90m(D:\Eureka\Jupiter_Swap_Tracker\[39msrc\jupiter_script.ts:5:58[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+[2024-12-09T06:57:17.464Z] LOG: WebSocket is open
+[2024-12-09T06:57:22.658Z] LOG: "2024-12-09T06:57:22.658Z" 5zh2PoUQXRoLxQ1fa12TrEVaHu9cPjMG4zHkQBTwLzMfdLkeVELzmRYkRZun8WWdGvjyHU6TyjB7Ky6oKYZidWmH
+[2024-12-09T06:57:25.252Z] LOG: "2024-12-09T06:57:25.252Z" 36HMJMdX7YiEDiWuorJsBepRJzfyaXrehs1cJAaQJkxcaaWsrffpqWA2QF7ry45xRtnXB4FNKyS1V5AznvBVxcHk
+[2024-12-09T06:57:36.152Z] LOG: "2024-12-09T06:57:36.152Z" 2XgL5HuADWZe4vAP5LJcHAhSh9PnTQSibzrSB36ja9hdaoqbdEpkUEe4XLMZsrjtyxFnbpP6RLYcxfTw1iwqjMH
+[2024-12-09T06:57:37.883Z] LOG: "2024-12-09T06:57:37.883Z" 56A7XdNEQWiHwTVtcSNFkeE74Z5Y8FCZQc3PYxgr3w5ss9Y7oBxCdxMYbdxmGHW42GQ9JkabvBj1xhm7U24JEXTv
+[2024-12-09T06:57:37.911Z] LOG: "2024-12-09T06:57:37.911Z" 2f6nPYFx3rcWd5StKJ4UqYpFLU9hLdALfYhp1sF1jnfP9tATutKWuezfc88DDAaLqxWdSqCAxi2t5EaGjPkHZzH4
+[2024-12-09T06:57:39.210Z] LOG: 
+[2024-12-09T06:57:39.211Z] LOG: {"transferAuthority":"Arb1wtZQbbxEuC1D4WD4Lk2ix6xv9KetB7CHdiuiMc6B","lastAccount":"DNmsPHniKz1x1GGwy3DLrfRZQEkPvmZS7GbaGPkn5j5K","instruction":"route","owner":"Arb1wtZQbbxEuC1D4WD4Lk2ix6xv9KetB7CHdiuiMc6B","programId":"JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4","signature":"56A7XdNEQWiHwTVtcSNFkeE74Z5Y8FCZQc3PYxgr3w5ss9Y7oBxCdxMYbdxmGHW42GQ9JkabvBj1xhm7U24JEXTv","legCount":4,"volumeInUSD":178.44640529448796,"inSymbol":null,"inAmount":"773044551","inAmountInDecimal":0.773044551,"inAmountInUSD":178.44640529448796,"inMint":"So11111111111111111111111111111111111111112","outSymbol":null,"outAmount":"773100138","outAmountInDecimal":0.773100138,"outAmountInUSD":178.45923676754896,"outMint":"So11111111111111111111111111111111111111112","exactOutAmount":"0","exactOutAmountInUSD":0,"swapData":[{"amm":"Lifinity v2","inMint":"So11111111111111111111111111111111111111112","inAmount":"773044551","inAmountInDecimal":"0.773044551","inAmountInUSD":"178.446405294487962","outMint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","outAmount":"178455117","outAmountInDecimal":"178.455117","outAmountInUSD":"178.455473910234"},{"amm":"Openbook v2","inMint":"EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v","inAmount":"178455117","inAmountInDecimal":"178.455117","inAmountInUSD":"178.455473910234","outMint":"cbbtcf3aa214zXHbiAZQwf4122FBYbraNdFqgw4iMij","outAmount":"180000","outAmountInDecimal":"0.0018","outAmountInUSD":"178.483253320134"},{"amm":"Meteora DLMM","inMint":"cbbtcf3aa214zXHbiAZQwf4122FBYbraNdFqgw4iMij","inAmount":"180000","inAmountInDecimal":"0.0018","inAmountInUSD":"178.483253320134","outMint":"3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh","outAmount":"180324","outAmountInDecimal":"0.00180324","outAmountInUSD":"178.5085423772209704"},{"amm":"Whirlpool","inMint":"3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh","inAmount":"180324","inAmountInDecimal":"0.00180324","inAmountInUSD":"178.5085423772209704","outMint":"So11111111111111111111111111111111111111112","outAmount":"773100138","outAmountInDecimal":"0.773100138","outAmountInUSD":"178.459236767548956"}]}
+[2024-12-09T06:57:39.216Z] LOG: Finished in 1.333 seconds
+[2024-12-09T06:57:41.531Z] LOG: "2024-12-09T06:57:41.531Z" 3D2GKThbVQmCTXiwgJAqDDhcnPVpqAWBLpi3x5aVFeJicXiqGZoGCSz4bg6iS1xyZiNK92gEp92nH3jdPdjiPWav
+[2024-12-09T06:57:45.401Z] LOG: "2024-12-09T06:57:45.401Z" 2g4E4Va11Eduq1YxPTidqJkLMRfiYR6m34s54bScxteSw8QaEZNcdnz6qhgPq2b51wmDXfpw3NvBsdJMPUhB4iQw
+[2024-12-09T06:57:45.463Z] LOG: "2024-12-09T06:57:45.463Z" 4Ma5dhkD3b6Ruoecw69frMircdFSXyrMPPyu1dQoGU2mTHdniKd51vFANsQaq7XRqhN1t53X4WxuNLPQCrFXfHBm

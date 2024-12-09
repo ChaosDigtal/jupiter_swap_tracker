@@ -29,16 +29,28 @@ const logger = new Logger('sol-swap.log');
 const originalConsoleLog = console.log;
 const originalConsoleError = console.error;
 
+// Helper function to serialize arguments
+const serializeArgs = (args: unknown[]): string =>
+    args
+        .map(arg =>
+            typeof arg === 'bigint'
+                ? `${arg.toString()}n` // Handle BigInt specifically
+                : typeof arg === 'object'
+                ? JSON.stringify(arg, (_, value) => (typeof value === 'bigint' ? value.toString() : value)) // Replace BigInt in objects
+                : arg
+        )
+        .join(' ');
+
 // Override console.log
 console.log = (...args: unknown[]): void => {
-    const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(' ');
+    const message = serializeArgs(args);
     logger.log(message);
     originalConsoleLog.apply(console, args);
 };
 
 // Override console.error
 console.error = (...args: unknown[]): void => {
-    const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(' ');
+    const message = serializeArgs(args);
     logger.error(message);
     originalConsoleError.apply(console, args);
 };

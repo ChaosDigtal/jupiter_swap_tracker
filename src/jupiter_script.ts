@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import csv from 'csv-parse';
 import fs from 'fs';
+import { Client } from 'pg';
 import './logger';
 import { AMM_TYPES, JUPITER_V6_PROGRAM_ID } from './constant';
 import { FeeEvent, SwapEvent, TransactionWithMeta } from './types';
@@ -204,7 +205,18 @@ const processTransactionWithMeta = (tx: TransactionWithMeta) => {
     return tx;
 };
 
-let tokenUSDPrice : PriceData = {};
+let tokenUSDPrice: PriceData = {};
+
+const client = new Client({
+    host: 'trading.copaicjskl31.us-east-2.rds.amazonaws.com',
+    database: 'trading',
+    user: 'creative_dev',
+    password: '4hXWW1%G$',
+    port: 5000,
+    ssl: {
+        rejectUnauthorized: false // Bypass certificate validation
+    }
+})
 
 async function getUSDPriceForTokens(tokens: string) {
     try {
@@ -221,6 +233,105 @@ async function getUSDPriceForTokens(tokens: string) {
 
     return;
 }
+
+const safeNumber = value => {
+    if (value.isNaN() || !value.isFinite()) {
+        return new Decimal(0) // or new Decimal(null), depending on your database schema
+    }
+    const maxPrecision = 50
+    const maxScale = 18
+    const maxValue = new Decimal(
+        '9.999999999999999999999999999999999999999999999999E+31'
+    ) // Adjust based on precision and scale
+    const minValue = maxValue.negated()
+
+    if (value.greaterThan(maxValue)) {
+        return maxValue
+    }
+    if (value.lessThan(minValue)) {
+        return minValue
+    }
+    return value
+}
+
+// async function db_save_batch(swaps : SwapAttributes) {
+//     const BATCH_SIZE = 100
+
+//     const batches = []
+//     for (let i = 0; i < swaps.length; i += BATCH_SIZE) {
+//         const batch = swaps.slice(i, i + BATCH_SIZE)
+//         batches.push(batch)
+//     }
+
+//     for (let i = 0; i < batches.length; ++i) {
+//         const batch = batches[i]
+//         const values = []
+//         const placeholders = batch
+//             .map((_, i) => {
+//                 const offset = i * 15
+//                 return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4
+//                     }, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8}, $${offset + 9
+//                     }, $${offset + 10}, $${offset + 11}, $${offset + 12}, $${offset + 13
+//                     }, $${offset + 14}, $${offset + 15})`
+//             })
+//             .join(',')
+//         for (let j = 0; j < batch.length; ++j) {
+//             const event = batch[j]
+//             values.push(
+//                 event.slot,
+//                 event.signature,
+//                 event.wallet,
+//                 event.token0.id.toLowerCase(),
+//                 event.token0.symbol,
+//                 safeNumber(event.token0.amount ?? new Decimal(0)).toString(),
+//                 safeNumber(event.token0.value_in_usd ?? new Decimal(0)).toString(),
+//                 safeNumber(
+//                     event.token0.total_exchanged_usd ?? new Decimal(0)
+//                 ).toString(),
+//                 event.token1.id.toLowerCase(),
+//                 event.token1.symbol,
+//                 safeNumber(event.token1.amount ?? new Decimal(0)).toString(),
+//                 safeNumber(event.token1.value_in_usd ?? new Decimal(0)).toString(),
+//                 safeNumber(
+//                     event.token1.total_exchanged_usd ?? new Decimal(0)
+//                 ).toString(),
+//                 // safeNumber(SOL2USD ?? new Decimal(0)).toString(),
+//                 event.created_at.toISOString()
+//             )
+//         }
+//         const query = `
+// INSERT INTO sol_swap_events (
+// block_number,
+// transaction_hash,
+// wallet_address,
+// token0_id,
+// token0_symbol,
+// token0_amount,
+// token0_value_in_usd,
+// token0_total_exchanged_usd,
+// token1_id,
+// token1_symbol,
+// token1_amount,
+// token1_value_in_usd,
+// token1_total_exchanged_usd,
+// sol_usd_price,
+// created_at
+// ) VALUES ${placeholders}
+// `
+//         try {
+//             await client.query(query, values)
+//         } catch (err) {
+//             console.error('Error saving batch of events', err)
+//             fs.appendFile('./logs/error.txt', err + '\n', err => {
+//                 if (err) {
+//                     console.error('Error writing file', err)
+//                 } else {
+//                     console.log('File has been written successfully')
+//                 }
+//             })
+//         }
+//     }
+// }
 
 // Function to parse a transaction (to be implemented as per use case)
 async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes | undefined> {
@@ -273,7 +384,7 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
         accountsToBeFetched.push(feeEvent.account);
     }
 
-    await getUSDPriceForTokens( accountsToBeFetched.map(pk => pk.toString()).join(','))
+    await getUSDPriceForTokens(accountsToBeFetched.map(pk => pk.toString()).join(','))
 
     const swapData = await parseSwapEvents(accountInfosMap, swapEvents);
     const instructions = parser.getInstructions(tx);
@@ -394,7 +505,9 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
         swap.feeAmountInUSD = amountInUSD?.toNumber();
         swap.feeMint = mint;
     }
-    console.log(swapData);
+
+    console.log(swap);
+    // db_save_batch(swap);
     console.log(
         `Finished in ${(new Date().getTime() - start_time.getTime()) / 1000
         } seconds`

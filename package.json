@@ -23,9 +23,11 @@
     "@solana/spl-token": "^0.3.8",
     "@solana/spl-token-registry": "^0.2.7",
     "@solana/web3.js": "^1.73.2",
+    "@types/pg": "^8.11.10",
     "commander": "^9.1.0",
     "csv-parse": "^5.6.0",
     "decimal.js": "^10.3.1",
-    "got": "^11.8.2"
+    "got": "^11.8.2",
+    "pg": "^8.13.1"
   }
 }
