@@ -221,7 +221,7 @@ const client = new Client({
 async function testConnection() {
     try {
         await client.connect(); // Attempt to connect
-        console.log('Connection successful!');
+        console.log('AWS Connection successful!');
     } catch (err) {
         console.error('Connection failed:', err.message);
     }
