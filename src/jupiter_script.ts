@@ -233,7 +233,7 @@ testConnection();
 async function getUSDPriceForTokens(tokens: string) {
     try {
         let payload = (await got
-            .get(`https://api.jup.ag/price/v2?ids=${tokens}`)
+            .get(`https://api.jup.ag/price/v2?ids=${tokens},So11111111111111111111111111111111111111112`)
             .json()) as any;
 
         if (payload['data'] === undefined)
@@ -340,7 +340,7 @@ async function db_save_summary(swap: SwapAttributes) {
         safeNumber(
             swap.outAmountInDecimal ? new Decimal(swap.outAmountInDecimal) : defaultDecimal
         ).toString(),
-        new Decimal(0).toString(),
+        tokenUSDPrice['So11111111111111111111111111111111111111112'],
         swap.timestamp.toISOString()];
     try {
         await client.query(query, value);
