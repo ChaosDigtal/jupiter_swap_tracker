@@ -298,6 +298,60 @@ async function fetchWalletAddresses() {
     }
 }
 
+async function db_save_summary(swap: SwapAttributes) {
+    const placeholders = `
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+    `;
+
+    const query = `
+    INSERT INTO sol_swap_events_cd (
+        block_number,
+        transaction_hash,
+        wallet_address,
+        token0_id,
+        token0_symbol,
+        token0_amount,
+        token0_value_in_usd,
+        token0_total_exchanged_usd,
+        token1_id,
+        token1_symbol,
+        token1_amount,
+        token1_value_in_usd,
+        token1_total_exchanged_usd,
+        sol_usd_price,
+        created_at
+    ) VALUES ${placeholders}`;
+
+    const defaultDecimal = new Decimal(0);
+    const value = [0,
+        swap.signature,
+        swap.owner,
+        swap.inMint,
+        '',
+        safeNumber(swap.inAmountInDecimal ? new Decimal(swap.inAmountInDecimal) : defaultDecimal).toString(),
+        safeNumber(swap.inAmountInUSD ? new Decimal(swap.inAmountInUSD): defaultDecimal).toString(),
+        safeNumber(
+            swap.inAmountInDecimal ? new Decimal(swap.inAmountInDecimal) : defaultDecimal
+        ).toString(),
+        swap.outMint,
+        '',
+        safeNumber(swap.outAmountInDecimal ? new Decimal(swap.outAmountInDecimal) : defaultDecimal).toString(),
+        safeNumber(swap.outAmountInUSD ? new Decimal(swap.outAmountInUSD): defaultDecimal).toString(),
+        safeNumber(
+            swap.outAmountInDecimal ? new Decimal(swap.outAmountInDecimal) : defaultDecimal
+        ).toString(),
+        new Decimal(0).toString(),
+        swap.timestamp.toISOString()];
+    try {
+        await client.query(query, value);
+    } catch (err) {
+        console.error('Error saving batch of events', err);
+        fs.appendFile('./logs/error.txt', `Error: ${err}\nQuery: ${query}\nValues: ${JSON.stringify(swap)}\n`, (err) => {
+            if (err) console.error('Error writing log file', err);
+        });
+    }
+}
+
 async function db_save_batch(swap: SwapAttributes) {
     const BATCH_SIZE = 100;
     const COLUMN_COUNT = 15;
@@ -556,7 +610,7 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
     // }
 
     // console.log(swap);
-    await db_save_batch(swap);
+    await db_save_summary(swap);
 
     console.log(
         `Finished in ${(new Date().getTime() - start_time.getTime()) / 1000
