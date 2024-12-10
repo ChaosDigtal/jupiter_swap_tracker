@@ -329,14 +329,16 @@ async function db_save_summary(swap: SwapAttributes) {
         swap.inMint,
         '',
         safeNumber(swap.inAmountInDecimal ? new Decimal(swap.inAmountInDecimal) : defaultDecimal).toString(),
-        safeNumber(swap.inAmountInUSD ? new Decimal(swap.inAmountInUSD): defaultDecimal).toString(),
+        tokenUSDPrice[swap.inMint].price ? tokenUSDPrice[swap.inMint].price: defaultDecimal.toString(),
+        // safeNumber(swap.inAmountInUSD ? new Decimal(swap.inAmountInUSD): defaultDecimal).toString(),
         safeNumber(
             swap.inAmountInDecimal ? new Decimal(swap.inAmountInUSD) : defaultDecimal
         ).toString(),
         swap.outMint,
         '',
         safeNumber(swap.outAmountInDecimal ? new Decimal(swap.outAmountInDecimal) : defaultDecimal).toString(),
-        safeNumber(swap.outAmountInUSD ? new Decimal(swap.outAmountInUSD): defaultDecimal).toString(),
+        tokenUSDPrice[swap.outMint].price ? tokenUSDPrice[swap.outMint].price: defaultDecimal.toString(),
+        // safeNumber(swap.outAmountInUSD ? new Decimal(swap.outAmountInUSD): defaultDecimal).toString(),
         safeNumber(
             swap.outAmountInDecimal ? new Decimal(swap.outAmountInUSD) : defaultDecimal
         ).toString(),
