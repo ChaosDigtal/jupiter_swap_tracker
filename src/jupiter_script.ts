@@ -340,7 +340,7 @@ async function db_save_summary(swap: SwapAttributes) {
         safeNumber(
             swap.outAmountInDecimal ? new Decimal(swap.outAmountInDecimal) : defaultDecimal
         ).toString(),
-        safeNumber(new Decimal(tokenUSDPrice['So11111111111111111111111111111111111111112'].price)),
+        tokenUSDPrice['So11111111111111111111111111111111111111112'].price,
         swap.timestamp.toISOString()];
     try {
         await client.query(query, value);
