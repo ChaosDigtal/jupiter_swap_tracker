@@ -23,6 +23,7 @@ export interface TransactionWithMeta {
             instructions: (ParsedInstruction | PartialInstruction)[];
         }[]
         | null;
+        err: any;
         postTokenBalances: {
             accountIndex: number,
             mint: string,

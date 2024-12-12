@@ -329,7 +329,7 @@ async function db_save_summary(swap: SwapAttributes) {
         swap.inMint,
         '',
         safeNumber(swap.inAmountInDecimal ? new Decimal(swap.inAmountInDecimal) : defaultDecimal).toString(),
-        tokenUSDPrice[swap.inMint].price ? tokenUSDPrice[swap.inMint].price: defaultDecimal.toString(),
+        tokenUSDPrice[swap.inMint].price ? tokenUSDPrice[swap.inMint].price : defaultDecimal.toString(),
         // safeNumber(swap.inAmountInUSD ? new Decimal(swap.inAmountInUSD): defaultDecimal).toString(),
         safeNumber(
             swap.inAmountInDecimal ? new Decimal(swap.inAmountInUSD) : defaultDecimal
@@ -337,7 +337,7 @@ async function db_save_summary(swap: SwapAttributes) {
         swap.outMint,
         '',
         safeNumber(swap.outAmountInDecimal ? new Decimal(swap.outAmountInDecimal) : defaultDecimal).toString(),
-        tokenUSDPrice[swap.outMint].price ? tokenUSDPrice[swap.outMint].price: defaultDecimal.toString(),
+        tokenUSDPrice[swap.outMint].price ? tokenUSDPrice[swap.outMint].price : defaultDecimal.toString(),
         // safeNumber(swap.outAmountInUSD ? new Decimal(swap.outAmountInUSD): defaultDecimal).toString(),
         safeNumber(
             swap.outAmountInDecimal ? new Decimal(swap.outAmountInUSD) : defaultDecimal
@@ -432,6 +432,12 @@ async function db_save_batch(swap: SwapAttributes) {
 // Function to parse a transaction (to be implemented as per use case)
 async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes | undefined> {
     const start_time = new Date()
+
+    if (tx.meta.err) {
+        console.log(`Failed transaction ${tx.transaction.signatures[0]} : ${tx.meta.err}`);
+        return;
+    }
+
     console.log(start_time, tx.transaction.signatures[0], `transaction count: ${tx.meta.innerInstructions.length}`)
 
     const accountInfosMap: AccountInfoMap = new Map();
@@ -713,7 +719,7 @@ function extractMintDecimals(accountInfosMap: AccountInfoMap, mint: PublicKey) {
 // Initialize the WebSocket connection and set up event handlers
 async function initializeWebSocket(): Promise<void> {
     // Test
-    
+
     // const connection = new Connection('https://mainnet.helius-rpc.com/?api-key=35eb685f-3541-4c70-a396-7aa18696c965'); // Use your own RPC endpoint here.
     // const tx = await connection.getParsedTransaction('5GZkharviv6BETxeU4HCAt4r9zRa6MUEtNnbZZW2xWkPkm113R1BozVHoJJqZoxERiuj9Kk8FnBqEnaf2x1ts2tR', {
     //   maxSupportedTransactionVersion: 0,
