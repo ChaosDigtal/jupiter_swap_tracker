@@ -782,6 +782,8 @@ async function initializeWebSocket(): Promise<void> {
 
     ws.on('error', (err: Error) => {
         console.error('WebSocket error:', err);
+        console.log('WebSocket is restarting in 5 seconds');
+        setTimeout(initializeWebSocket, 5000);
     });
 
     ws.on('close', () => {
