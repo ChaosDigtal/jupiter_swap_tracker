@@ -793,15 +793,67 @@ async function initializeWebSocket(): Promise<void> {
     });
 }
 
-initializeWebSocket();
+const main = async () => {
+    let timer_ws: NodeJS.Timeout | null = null;
 
-const server = http.createServer((req, res) => {
-    res.statusCode = 200
-    res.setHeader('Content-Type', 'text/plain')
-    res.end('Hello, World!\n')
-})
+    const connectWebSocket = () => {
+        console.log("Connecting websocket");
+        if (timer_ws) {
+            clearTimeout(timer_ws);
+        }
+        timer_ws = setTimeout(connectWebSocket, 20 * 1000);
 
-const PORT = process.env.PORT || 3000
-server.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}/`)
-})
+        const ws = new WebSocket(
+            'wss://atlas-mainnet.helius-rpc.com/?api-key=ca2cdbc8-39e0-483e-9514-7581edc3c44f'
+        );
+
+        ws.on('open', async () => {
+            console.log('WebSocket is open');
+            const filePath = 'sol_wallets.csv';
+
+            const wallets = await fetchWalletAddresses();
+            sendRequest(ws, wallets)
+            startPing(ws)
+        });
+
+        ws.on('message', (data: WebSocket.Data) => {
+            const messageStr = data.toString('utf8');
+            try {
+                const messageObj: WebSocketMessage = JSON.parse(messageStr);
+                if (!messageObj.params) return;
+                const tx: TransactionWithMeta = messageObj.params.result?.transaction as TransactionWithMeta;
+                if (tx) parseTransaction(tx);
+            } catch (e) {
+                console.error('Failed to parse JSON:', e);
+            }
+        });
+
+        ws.on('error', (err: Error) => {
+            console.error('WebSocket error:', err);
+            console.log('WebSocket is restarting in 5 seconds');
+            setTimeout(initializeWebSocket, 5000);
+        });
+
+        ws.on('close', () => {
+            console.log('WebSocket is closed');
+            console.log('WebSocket is restarting in 5 seconds');
+            setTimeout(initializeWebSocket, 5000);
+        });
+    }
+
+    await connectWebSocket();
+
+    const server = http.createServer((req, res) => {
+        res.statusCode = 200
+        res.setHeader('Content-Type', 'text/plain')
+        res.end('Hello, World!\n')
+    })
+
+    const PORT = process.env.PORT || 3000
+    server.listen(PORT, () => {
+        console.log(`Server running at http://localhost:${PORT}/`)
+    })
+
+}
+
+main()
