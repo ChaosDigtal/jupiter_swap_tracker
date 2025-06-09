@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^22.15.30",
     "tsup": "^6.4.0",
     "typescript": "^4.4.4"
   },
@@ -24,9 +25,11 @@
     "@solana/spl-token-registry": "^0.2.7",
     "@solana/web3.js": "^1.73.2",
     "@types/pg": "^8.11.10",
+    "axios": "^1.9.0",
     "commander": "^9.1.0",
     "csv-parse": "^5.6.0",
     "decimal.js": "^10.3.1",
+    "dotenv": "^16.5.0",
     "got": "^11.8.2",
     "pg": "^8.13.1"
   }

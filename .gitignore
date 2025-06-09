@@ -3,3 +3,4 @@ yarn.lock
 package-lock.json
 sol-swap.log
 src/sol-swap.log
+.env

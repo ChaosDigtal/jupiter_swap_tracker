@@ -77,8 +77,8 @@ export class InstructionParser {
             if (!instruction.programId.equals(this.programId)) {
                 continue;
             }
-
             const ix = this.coder.instruction.decode(instruction.data, "base58");
+
             // This will happen because now event is also an CPI instruction.
             if (!ix) {
                 continue;

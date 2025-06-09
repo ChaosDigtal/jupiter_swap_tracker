@@ -18,8 +18,6 @@ import got from 'got';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-require('dotenv').config();
-
 export type SwapAttributes = {
     owner: string;
     transferAuthority: string;
@@ -67,6 +65,7 @@ type AccountInfo = {
     owner: string,
     programId: string
 }
+
 type AccountInfoMap = Map<string, AccountInfo>;
 
 export const program = new Program<Jupiter>(
@@ -214,15 +213,26 @@ const processTransactionWithMeta = (tx: TransactionWithMeta) => {
 let tokenUSDPrice: PriceData = {};
 
 const client = new Client({
-    host: '127.0.0.1',
+    host: '18.117.159.85',
     database: 'trading',
-    user: 'adreesdev@gmail.com',
-    password: 'dKKDxnaOyx06qQk',
+    user: 'creative_dev',
+    password: 'DuBR0NCMAsRg1bu',
     port: 5000,
     ssl: {
         rejectUnauthorized: false // Bypass certificate validation
     }
 })
+
+async function testConnection() {
+    try {
+        await client.connect(); // Attempt to connect
+        console.log('AWS Connection successful!');
+    } catch (err) {
+        console.error('Connection failed:', err.message);
+    }
+}
+
+testConnection();
 
 const getSolTokenPrice = async (tokens = '"So11111111111111111111111111111111111111112"') => {
     const tokenIdSolStr = tokens.split(',').map(tok => `"${tok}"`).join(',')
@@ -286,15 +296,6 @@ const getSolTokenPrice = async (tokens = '"So11111111111111111111111111111111111
     }
 }
 
-async function testConnection() {
-    try {
-        await client.connect(); // Attempt to connect
-        console.log('AWS Connection successful!');
-    } catch (err) {
-        console.error('Connection failed:', err.message);
-    }
-}
-
 async function getUSDPriceForTokens(tokens: string) {
     try {
         let payload = (await got
@@ -328,8 +329,6 @@ async function getUSDPriceForTokens(tokens: string) {
     }
 }
 
-testConnection();
-
 const safeNumber = (value: Decimal) => {
     if (value.isNaN() || !value.isFinite()) {
         return new Decimal(0) // or new Decimal(null), depending on your database schema
@@ -362,7 +361,7 @@ async function fetchWalletAddresses() {
         SELECT t_wallet_address
         FROM dblink(
           'host=prod-trading.copaicjskl31.us-east-2.rds.amazonaws.com port=5000 dbname=trading user=creative_dev_lim password=6cVgAGualY9qO9c',
-          'select distinct wallet from turnkey_wallets_sol_vw'
+          'SELECT DISTINCT t_wallet_address FROM turnkey_wallets_sol'
         ) AS remote_data(t_wallet_address TEXT);
       `;
 
@@ -514,7 +513,6 @@ async function db_save_batch(swap: SwapAttributes) {
 // Function to parse a transaction (to be implemented as per use case)
 async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes | undefined> {
     const start_time = new Date()
-    console.log(tx);
 
     if (tx.meta.err) {
         console.log(`Failed transaction ${tx.transaction.signatures[0]} : ${tx.meta.err}`);
@@ -555,6 +553,8 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
 
     const parser = new InstructionParser(programId);
     const events = getEvents(program, tx);
+    // console.log(events)
+    // return
 
     const swapEvents = reduceEventData<SwapEvent>(events, "SwapEvent");
     const feeEvent = reduceEventData<FeeEvent>(events, "FeeEvent")[0];
@@ -576,7 +576,7 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
 
     await getUSDPriceForTokens(accountsToBeFetched.map(pk => pk.toString()).join(','))
 
-    const swapData = parseSwapEvents(accountInfosMap, swapEvents);
+    const swapData = await parseSwapEvents(accountInfosMap, swapEvents);
     const instructions = parser.getInstructions(tx);
     const [initialPositions, finalPositions] =
         parser.getInitialAndFinalSwapPositions(instructions);
@@ -675,7 +675,7 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
 
     swap.swapData = swapData;
     // swap.swapData = JSON.parse(JSON.stringify(swapData));
-    console.log(feeEvent)
+    // console.log(feeEvent)
 
     // if (feeEvent) {
     //     console.log('accountInfo')
@@ -700,8 +700,8 @@ async function parseTransaction(tx: TransactionWithMeta): Promise<SwapAttributes
     //     swap.feeMint = mint;
     // }
 
-    // console.log(swap);
-    await db_save_summary(swap);
+    console.log(swap);
+    // await db_save_summary(swap);
 
     console.log(
         `Finished in ${(new Date().getTime() - start_time.getTime()) / 1000
@@ -770,6 +770,8 @@ function extractVolume(
     const tokenPriceInUSD = new Decimal(tokenUSDPrice[mint.toBase58()].price);
     // const tokenPriceInUSD = await getPriceInUSDByMint(mint.toBase58());
     const tokenDecimals = extractMintDecimals(accountInfosMap, mint);
+
+    console.log(tokenDecimals)
     const amountInDecimal = DecimalUtil.fromBN(amount, tokenDecimals);
     const amountInUSD = tokenPriceInUSD
         ? amountInDecimal.mul(tokenPriceInUSD)
@@ -803,17 +805,18 @@ function extractMintDecimals(accountInfosMap: AccountInfoMap, mint: PublicKey) {
 async function initializeWebSocket(): Promise<void> {
     // Test
 
-    // const connection = new Connection('https://mainnet.helius-rpc.com/?api-key=35eb685f-3541-4c70-a396-7aa18696c965'); // Use your own RPC endpoint here.
-    // const tx = await connection.getParsedTransaction('5GZkharviv6BETxeU4HCAt4r9zRa6MUEtNnbZZW2xWkPkm113R1BozVHoJJqZoxERiuj9Kk8FnBqEnaf2x1ts2tR', {
-    //   maxSupportedTransactionVersion: 0,
-    // });
+    const connection = new Connection('https://mainnet.helius-rpc.com/?api-key=ebb0bb5f-69c0-4120-83b8-e51a3091de07'); // Use your own RPC endpoint here.
+    const tx = await connection.getParsedTransaction('4Fz2LbkwCJhpWTFwxeJizZzUdUQaenWga6MutAwHAX1XvmyNwiLk54cerSEFAqfCzs3H38MV8jdhdaBkeNDBoaQQ', {
+        // const tx = await connection.getParsedTransaction('5gue2qPsWYgLaMnoSC4xsBCBPCZfrwERCf1jHpEyYLsoManq7EYmx6ZU7qHMrbFGWHMPvrqqjFBmSsMhjxTsnLvn', {
+        maxSupportedTransactionVersion: 0,
+    });
 
-    // if (tx.meta.err) {
-    //   console.log("Failed transaction", tx.meta.err);
-    // }
+    if (tx.meta.err) {
+        console.log("Failed transaction", tx.meta.err);
+    }
 
-    // parseTransaction(tx as TransactionWithMeta)
-    // return;
+    parseTransaction(tx as TransactionWithMeta)
+    return;
     const ws = new WebSocket(
         'wss://atlas-mainnet.helius-rpc.com/?api-key=d4c3be7b-0548-494d-ae87-d46aeb48614f'
     );
@@ -825,7 +828,7 @@ async function initializeWebSocket(): Promise<void> {
         const wallets = await fetchWalletAddresses();
         sendRequest(ws, wallets)
         startPing(ws)
-        // console.log(wallets)
+        console.log(wallets)
         // const dataList: string[] = [];
 
         // const readStream = fs.createReadStream(filePath);
@@ -856,7 +859,6 @@ async function initializeWebSocket(): Promise<void> {
             const messageObj: WebSocketMessage = JSON.parse(messageStr);
             if (!messageObj.params) return;
             const tx: TransactionWithMeta = messageObj.params.result?.transaction as TransactionWithMeta;
-            console.log(tx);
             if (tx) parseTransaction(tx);
         } catch (e) {
             console.error('Failed to parse JSON:', e);
@@ -877,6 +879,9 @@ async function initializeWebSocket(): Promise<void> {
 }
 
 const main = async () => {
+
+    await initializeWebSocket();
+    return;
     let timer_ws: NodeJS.Timeout | null = null;
 
     const connectWebSocket = () => {
@@ -905,7 +910,6 @@ const main = async () => {
                 const messageObj: WebSocketMessage = JSON.parse(messageStr);
                 if (!messageObj.params) return;
                 const tx: TransactionWithMeta = messageObj.params.result?.transaction as TransactionWithMeta;
-                console.log(tx)
                 if (tx) parseTransaction(tx);
             } catch (e) {
                 console.error('Failed to parse JSON:', e);
@@ -933,7 +937,7 @@ const main = async () => {
         res.end('Hello, World!\n')
     })
 
-    const PORT = process.env.PORT || 3000
+    const PORT = process.env.PORT || 3005
     server.listen(PORT, () => {
         console.log(`Server running at http://localhost:${PORT}/`)
     })

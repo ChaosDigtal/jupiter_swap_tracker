@@ -53,7 +53,10 @@ export const AMM_TYPES = {
     Gswppe6ERWKpUTXvRPfXdzHhiCyJvLadVvXGfdpBqcE1: "GuacSwap",
     DEXYosS6oEGvk8uCDayvwEZz4qEyDJRf9nFgYCaqPMTm: "1DEX",
     "6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P": "Pump.Fun",
+    // "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA": "Pump.Fun AMM",
     obriQD1zbpyLz95G5n7nJe6a4DPjpFwa5XYPoNm113y: "Obric",
     SoLFiHG9TfgtdUXUjWAxi3LtvYuFyDLVhBWxdMZxyCe: "SolFi",
     HyhpEq587ANShDdbx1mP4dTmDZC44CXWft29oYQXDb53: "Fox",
+    ZERor4xhbUycZ6gb9ntrhqscUcZmAbQDjEAtCf4hbZY: "ZeroFi",
+    swapNyd8XiQwJ6ianp9snpu4brUqFxadzvHebnAXjJZ: "Stabble Stable Swap",
 };
